@@ -25,12 +25,43 @@ The extension uses DOM manipulation to modify caption styles without affecting t
 
 Since this extension is not published on the Chrome Web Store, you need to install it in developer mode:
 
+### GUI Method
 1. Download or clone this repository to your computer
 2. Open Chrome and go to `chrome://extensions/`
 3. Enable "Developer mode" by toggling the switch in the top right corner
 4. Click "Load unpacked" button
 5. Browse to the folder containing the extension files and select it
 6. The extension should now be installed and active
+
+### Command-Line Method
+
+**Note**: This command-line method will temporarily load the extension for the current session. The extension will remain installed until you close Chrome.
+
+1. Clone the repository using git:
+   ```bash
+   git clone [repository-url] ~/Downloads/allow-copy-google-meet-caption
+   ```
+   Or download directly:
+   ```bash
+   wget [zip-file-url] -O extension.zip && unzip extension.zip -d ~/Downloads/allow-copy-google-meet-caption
+   ```
+
+2. Use the provided installation script:
+   ```bash
+   cd ~/Downloads/allow-copy-google-meet-caption
+   chmod +x install_extension.sh
+   ./install_extension.sh
+   ```
+
+3. Alternatively, launch Chrome with the extension loaded manually (close Chrome first if it's already running):
+   ```bash
+   google-chrome --load-extension=~/Downloads/allow-copy-google-meet-caption
+   ```
+
+   For Chrome on macOS:
+   ```bash
+   /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --load-extension=~/Downloads/allow-copy-google-meet-caption
+   ```
 
 ## How to Use
 

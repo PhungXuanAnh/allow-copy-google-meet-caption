@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "selenium": {
+        "command": "/home/xuananh/repo/selenium-mcp-server/.venv/bin/python",
+        "args": [
+            "-m",
+            "mcp_server_selenium",
+            "--user_data_dir=/home/xuananh/.config/google-chrome-selenium-mcp-copy-google-meet-caption",
+            "--port=9227"
+        ],
+        "env": {
+          "PYTHONPATH": "/home/xuananh/repo/selenium-mcp-server/src"
+        }
+    },
+  }
+}

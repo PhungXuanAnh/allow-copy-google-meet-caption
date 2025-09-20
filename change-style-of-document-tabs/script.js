@@ -75,6 +75,13 @@ function enableDocumentTabsStyle() {
         stylesApplied++;
       });
 
+      // Change width to 320px for the specific navigation widget div
+      // const navigationWidget = document.querySelector('div.navigation-widget.navigation-widget-unified-styling.docs-material.navigation-widget-floating-navigation-button.navigation-location-indicator.outline-refresh.navigation-widget-hoverable.navigation-widget-chaptered.left-sidebar-container-content-child');
+      // if (navigationWidget) {
+      //   applyStylesToElement(navigationWidget, { width: '320px' });
+      //   stylesApplied++;
+      // }
+
       // Remove vertical line divs from menu items
       const menuItems = document.querySelectorAll('div[role="menuitem"]');
       menuItems.forEach(menuItem => {

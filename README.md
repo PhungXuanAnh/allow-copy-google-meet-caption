@@ -1,35 +1,72 @@
-# Google Meet Caption Copy - Chrome Extension
+# Google Meet Caption Copy & Google Docs Tab Style - Chrome Extension
 
-A Chrome extension that allows you to copy text from Google Meet captions while maintaining visibility of speaker names and avatars.
+A Chrome extension that enhances your Google workspace experience by enabling caption copying in Google Meet and improving navigation styling in Google Docs.
 
 ## Description
 
-This Chrome extension solves a common issue in Google Meet where caption text can't be easily selected and copied. When installed and enabled, this extension:
+This Chrome extension provides two key enhancements for Google workspace:
 
-1. Makes caption text selectable and copyable
-2. Preserves speaker names and avatars visibility
-3. Works automatically on all Google Meet sessions
+### Google Meet Caption Copy
+Makes caption text selectable and copyable while maintaining visibility of speaker names and avatars.
 
-The extension uses DOM manipulation to modify caption styles without affecting the overall appearance or functionality of Google Meet.
+### Google Docs Tab Style Enhancement
+Improves the visual styling of navigation tabs in Google Docs by:
+- Reducing font size and line spacing for better readability
+- Optimizing padding and indentation for nested navigation levels
+- Removing unnecessary vertical line dividers
+- Creating a more compact and clean navigation experience
+
+## Features
+
+### Google Meet (meet.google.com)
+- ✅ Makes caption text selectable and copyable
+- ✅ Maintains visibility of speaker names and avatars  
+- ✅ Works with dynamic content (new speakers, caption updates)
+- ✅ Detects caption structure automatically
+- ✅ Performance optimized to minimize impact on meetings
+
+### Google Docs (docs.google.com) 
+- ✅ Enhanced navigation item font styling (13px/18px arial)
+- ✅ Reduced spacing between navigation items (20px height, optimized padding)
+- ✅ Improved left padding for all navigation levels (0px, 12px, 24px, 36px)
+- ✅ Removed vertical line dividers for cleaner appearance
+- ✅ Dynamic content monitoring for real-time updates
+- ✅ Automatic re-styling when document structure changes
 
 ## Architecture
 
 This extension uses a modular architecture to avoid code duplication:
 
-- **`content.js`**: Chrome extension content script (lightweight wrapper)
-- **`allow-copy-caption-in-google-meet/script.js`**: Core functionality (can also be used standalone)
-- **`manifest.json`**: Extension configuration with web-accessible resources
+- **`content.js`**: Chrome extension content script (domain detection and script loading)
+- **`allow-copy-caption-in-google-meet/script.js`**: Google Meet caption functionality
+- **`change-style-of-document-tabs/script.js`**: Google Docs navigation styling
+- **`manifest.json`**: Extension configuration with permissions for both domains
 
-The core script can be used both as part of the extension and as a standalone console script for quick testing.
+Both core scripts can be used independently as standalone console scripts for quick testing.
 
-## Features
+## Execution Flow
 
-- ✅ Makes caption text selectable and copyable
-- ✅ Maintains visibility of speaker names and avatars
-- ✅ Works with dynamic content (new speakers, caption updates)
-- ✅ Detects caption structure automatically
-- ✅ Performance optimized to minimize impact on meeting
-- ✅ Compatible with the latest Google Meet UI
+The extension uses intelligent domain detection to load the appropriate functionality:
+
+### Google Meet (`https://meet.google.com/*`)
+1. **Content script loads** → `initializeExtension()` detects Google Meet domain
+2. **Domain check** → `checkForGoogleMeet()` confirms we're on meet.google.com
+3. **Script loading** → `loadCaptionCopyScript()` fetches and executes the caption copy script
+4. **Caption enhancement** → `enableCaptionCopy()` applies styling to make captions selectable
+5. **Dynamic monitoring** → Mutation observer watches for new captions and applies styles automatically
+
+### Google Docs (`https://docs.google.com/*`)
+1. **Content script loads** → `initializeExtension()` detects Google Docs domain  
+2. **Domain check** → `checkForGoogleDocs()` confirms we're on docs.google.com
+3. **Script loading** → `loadDocumentTabsScript()` fetches and executes the navigation styling script
+4. **Navigation enhancement** → `enableDocumentTabsStyle()` applies improved styling to document tabs
+5. **Dynamic monitoring** → Mutation observer watches for navigation changes and reapplies styles
+
+### Domain Isolation
+- Each script includes domain validation to prevent cross-execution
+- Google Docs script validates `window.location.hostname.includes('docs.google.com')`
+- Content script only loads appropriate functionality based on current domain
+- Extension works seamlessly across both Google workspace applications
 
 ## Installation Instructions (Developer Mode)
 

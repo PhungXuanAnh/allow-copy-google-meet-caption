@@ -68,6 +68,13 @@ function enableDocumentTabsStyle() {
         stylesApplied++;
       });
 
+      // Change left padding to 0 for all divs with class="navigation-item" and role="menuitem"
+      const specificNavigationItems = document.querySelectorAll('div.navigation-item[role="menuitem"]');
+      specificNavigationItems.forEach(item => {
+        applyStylesToElement(item, { 'padding-left': '0px' });
+        stylesApplied++;
+      });
+
       // Remove vertical line divs from menu items
       const menuItems = document.querySelectorAll('div[role="menuitem"]');
       menuItems.forEach(menuItem => {

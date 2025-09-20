@@ -12,6 +12,16 @@ This Chrome extension solves a common issue in Google Meet where caption text ca
 
 The extension uses DOM manipulation to modify caption styles without affecting the overall appearance or functionality of Google Meet.
 
+## Architecture
+
+This extension uses a modular architecture to avoid code duplication:
+
+- **`content.js`**: Chrome extension content script (lightweight wrapper)
+- **`allow-copy-caption-in-google-meet/script.js`**: Core functionality (can also be used standalone)
+- **`manifest.json`**: Extension configuration with web-accessible resources
+
+The core script can be used both as part of the extension and as a standalone console script for quick testing.
+
 ## Features
 
 - ✅ Makes caption text selectable and copyable
@@ -70,18 +80,45 @@ Since this extension is not published on the Chrome Web Store, you need to insta
 3. The extension will automatically make captions selectable
 4. You can now click and drag to select and copy caption text
 
+## Testing and Development
+
+For quick testing or development purposes, you can also run the core script directly in the browser console:
+
+1. Join a Google Meet session with captions enabled
+2. Open your browser's developer console (`F12` or `Ctrl+Shift+J`)
+3. Copy and paste the entire content of `allow-copy-caption-in-google-meet/script.js` into the console
+4. Press Enter to execute the script
+
+This allows for rapid testing and debugging without needing to reload the extension.
+
 ## How It Works
 
 The extension:
 
-1. Automatically finds the caption container in Google Meet
-2. Modifies CSS styles to make text selectable while keeping avatars visible by:
-   - Setting caption text to a higher z-index (bringing it to the front)
-   - Positioning speaker avatar elements to a lower z-index (sending them to the back)
-   - Enabling user selection on caption text
-   - Using pointer-events to allow clicking through avatar elements
-3. Sets up mutation observers to apply styles to new captions as they appear
-4. Adds a fallback check to ensure styles are consistently applied
+1. **Content Script (`content.js`)**: Detects Google Meet pages and dynamically loads the core functionality
+2. **Core Script (`allow-copy-caption-in-google-meet/script.js`)**: Contains the main caption manipulation logic
+3. **Automatic Processing**: Finds caption containers and modifies CSS styles to enable text selection
+4. **Dynamic Updates**: Uses mutation observers to handle new captions as they appear
+5. **Fallback Protection**: Includes periodic checks to ensure styles remain applied
+
+### Technical Implementation
+
+The core script:
+- Automatically finds the caption container in Google Meet
+- Modifies CSS styles to make text selectable while keeping avatars visible by:
+  - Setting caption text to a higher z-index (bringing it to the front)
+  - Positioning speaker avatar elements to a lower z-index (sending them to the back)
+  - Enabling user selection on caption text
+  - Using pointer-events to allow clicking through avatar elements
+- Sets up mutation observers to apply styles to new captions as they appear
+- Adds a fallback check to ensure styles are consistently applied
+
+### Modular Design Benefits
+
+- **Code Reusability**: Core functionality can be used both in the extension and standalone
+- **Easy Testing**: Copy-paste the script directly into console for quick testing
+- **Maintainability**: Single source of truth for caption manipulation logic
+- **Debugging**: Same debugging output whether used as extension or standalone script
 
 ## Privacy Notice
 
@@ -94,11 +131,25 @@ This extension:
 
 ## Technical Details
 
-- Uses MutationObserver to detect new captions
-- Targets elements by DOM structure for better reliability
-- Applies styles with important flag to override Google Meet's defaults
-- Includes fallback periodic check to ensure styles are maintained
-- Sets proper z-index and pointer-events to allow both visibility and text selection
+- **Modular Architecture**: Core functionality separated from extension wrapper
+- **Dynamic Loading**: Content script fetches and executes core script at runtime
+- **Dual-Mode Operation**: Core script works both as extension module and standalone console script
+- **MutationObserver**: Detects new captions in real-time
+- **Structure Detection**: Targets elements by DOM structure for better reliability
+- **Performance Optimized**: Applies styles with important flag to override Google Meet's defaults
+- **Fallback System**: Includes periodic check to ensure styles are maintained
+- **Z-index Management**: Proper layering to allow both visibility and text selection
+
+## File Structure
+
+```
+/
+├── content.js                 # Chrome extension content script (lightweight wrapper)
+├── manifest.json              # Extension configuration with web_accessible_resources
+└── allow-copy-caption-in-google-meet/
+    ├── script.js              # Core functionality (dual-mode: extension + standalone)
+    └── README.md              # Detailed documentation for standalone usage
+```
 
 ## Credits
 

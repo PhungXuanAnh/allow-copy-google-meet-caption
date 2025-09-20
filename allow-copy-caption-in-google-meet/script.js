@@ -284,13 +284,35 @@ function enableCaptionCopy() {
   }
 }
 
-// Export the function for use as a module
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { enableCaptionCopy };
-}
+// Script runs automatically when loaded as content script
+// Only execute if we're on Google Meet
+if (window.location.hostname === 'meet.google.com') {
+  // Function to initialize caption copy functionality
+  const initCaptionCopy = () => {
+    // Wait for the page to fully load before searching for caption elements
+    if (document.readyState === 'complete') {
+      // Give Google Meet a moment to initialize its UI
+      setTimeout(enableCaptionCopy, 5000); // 5 seconds delay
+    } else {
+      // Wait for the page to load completely
+      window.addEventListener('load', () => {
+        // Then wait a bit longer for Google Meet's dynamic content
+        setTimeout(enableCaptionCopy, 5000); // 5 seconds delay
+      });
+    }
+  };
 
-// If script is run directly (not imported), execute immediately
-if (typeof module === 'undefined' || !module.exports) {
-  // This will run when the script is executed directly in the browser console
-  enableCaptionCopy();
+  // Initialize on load
+  initCaptionCopy();
+
+  // Also handle URL changes for SPA navigation
+  let lastUrl = location.href;
+  new MutationObserver(() => {
+    const url = location.href;
+    if (url !== lastUrl) {
+      lastUrl = url;
+      console.log('📌 Google Meet: URL changed, reinitializing caption copy...');
+      setTimeout(enableCaptionCopy, 2000); // Shorter delay for navigation
+    }
+  }).observe(document, {subtree: true, childList: true});
 }

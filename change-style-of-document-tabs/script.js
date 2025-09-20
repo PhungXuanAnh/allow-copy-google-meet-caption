@@ -169,13 +169,35 @@ function enableDocumentTabsStyle() {
   }
 }
 
-// Export the function for use as a module
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { enableDocumentTabsStyle };
-}
+// Script runs automatically when loaded as content script
+// Only execute if we're on Google Docs
+if (window.location.hostname === 'docs.google.com') {
+  // Function to initialize document tabs styling
+  const initDocumentTabsStyle = () => {
+    // Wait for the page to fully load before applying navigation styles
+    if (document.readyState === 'complete') {
+      // Give Google Docs a moment to initialize its UI
+      setTimeout(enableDocumentTabsStyle, 3000); // 3 seconds delay
+    } else {
+      // Wait for the page to load completely
+      window.addEventListener('load', () => {
+        // Then wait a bit for Google Docs' dynamic content
+        setTimeout(enableDocumentTabsStyle, 3000); // 3 seconds delay
+      });
+    }
+  };
 
-// If script is run directly (not imported), execute immediately
-if (typeof module === 'undefined' || !module.exports) {
-  // This will run when the script is executed directly in the browser console
-  enableDocumentTabsStyle();
+  // Initialize on load
+  initDocumentTabsStyle();
+
+  // Also handle URL changes for SPA navigation
+  let lastUrl = location.href;
+  new MutationObserver(() => {
+    const url = location.href;
+    if (url !== lastUrl) {
+      lastUrl = url;
+      console.log('📌 Google Docs: URL changed, reinitializing tab styling...');
+      setTimeout(enableDocumentTabsStyle, 1000); // Shorter delay for navigation
+    }
+  }).observe(document, {subtree: true, childList: true});
 }

@@ -24,6 +24,7 @@ Improves the visual styling of navigation tabs in Google Docs by:
 - ✅ Works with dynamic content (new speakers, caption updates)
 - ✅ Detects caption structure automatically
 - ✅ Performance optimized to minimize impact on meetings
+- ✅ CSP compliant - no inline script injection
 
 ### Google Docs (docs.google.com) 
 - ✅ Enhanced navigation item font styling (13px/18px arial)
@@ -32,15 +33,16 @@ Improves the visual styling of navigation tabs in Google Docs by:
 - ✅ Removed vertical line dividers for cleaner appearance
 - ✅ Dynamic content monitoring for real-time updates
 - ✅ Automatic re-styling when document structure changes
+- ✅ CSP compliant - no inline script injection
 
 ## Architecture
 
-This extension uses a modular architecture to avoid code duplication:
+This extension uses a modular architecture with separate content scripts for each domain:
 
-- **`content.js`**: Chrome extension content script (domain detection and script loading)
-- **`allow-copy-caption-in-google-meet/script.js`**: Google Meet caption functionality
-- **`change-style-of-document-tabs/script.js`**: Google Docs navigation styling
-- **`manifest.json`**: Extension configuration with permissions for both domains
+- **`content.js`**: Chrome extension content script (domain detection and logging)
+- **`allow-copy-caption-in-google-meet/script.js`**: Google Meet caption functionality (loads directly on meet.google.com)
+- **`change-style-of-document-tabs/script.js`**: Google Docs navigation styling (loads directly on docs.google.com)
+- **`manifest.json`**: Extension configuration with separate content script declarations for each domain
 
 Both core scripts can be used independently as standalone console scripts for quick testing.
 
@@ -49,23 +51,21 @@ Both core scripts can be used independently as standalone console scripts for qu
 The extension uses intelligent domain detection to load the appropriate functionality:
 
 ### Google Meet (`https://meet.google.com/*`)
-1. **Content script loads** → `initializeExtension()` detects Google Meet domain
-2. **Domain check** → `checkForGoogleMeet()` confirms we're on meet.google.com
-3. **Script loading** → `loadCaptionCopyScript()` fetches and executes the caption copy script
-4. **Caption enhancement** → `enableCaptionCopy()` applies styling to make captions selectable
-5. **Dynamic monitoring** → Mutation observer watches for new captions and applies styles automatically
+1. **Content script loads** → `allow-copy-caption-in-google-meet/script.js` loads directly on meet.google.com
+2. **Domain validation** → Script confirms we're on meet.google.com and initializes
+3. **Caption enhancement** → `enableCaptionCopy()` applies styling to make captions selectable
+4. **Dynamic monitoring** → Mutation observer watches for new captions and applies styles automatically
 
 ### Google Docs (`https://docs.google.com/*`)
-1. **Content script loads** → `initializeExtension()` detects Google Docs domain  
-2. **Domain check** → `checkForGoogleDocs()` confirms we're on docs.google.com
-3. **Script loading** → `loadDocumentTabsScript()` fetches and executes the navigation styling script
-4. **Navigation enhancement** → `enableDocumentTabsStyle()` applies improved styling to document tabs
-5. **Dynamic monitoring** → Mutation observer watches for navigation changes and reapplies styles
+1. **Content script loads** → `change-style-of-document-tabs/script.js` loads directly on docs.google.com
+2. **Domain validation** → Script confirms we're on docs.google.com and initializes
+3. **Navigation enhancement** → `enableDocumentTabsStyle()` applies improved styling to document tabs
+4. **Dynamic monitoring** → Mutation observer watches for navigation changes and reapplies styles
 
 ### Domain Isolation
 - Each script includes domain validation to prevent cross-execution
-- Google Docs script validates `window.location.hostname.includes('docs.google.com')`
-- Content script only loads appropriate functionality based on current domain
+- Google Meet script validates `window.location.hostname === 'meet.google.com'`
+- Google Docs script validates `window.location.hostname === 'docs.google.com'`
 - Extension works seamlessly across both Google workspace applications
 
 ## Installation Instructions (Developer Mode)
@@ -132,30 +132,29 @@ This allows for rapid testing and debugging without needing to reload the extens
 
 The extension:
 
-1. **Content Script (`content.js`)**: Detects Google Meet pages and dynamically loads the core functionality
-2. **Core Script (`allow-copy-caption-in-google-meet/script.js`)**: Contains the main caption manipulation logic
-3. **Automatic Processing**: Finds caption containers and modifies CSS styles to enable text selection
-4. **Dynamic Updates**: Uses mutation observers to handle new captions as they appear
+1. **Content Scripts**: Each domain loads its specific content script directly from manifest.json
+2. **Domain Validation**: Each script validates it's running on the correct domain before initializing
+3. **Automatic Processing**: Finds target elements and modifies CSS styles to enable functionality
+4. **Dynamic Updates**: Uses mutation observers to handle new content as it appears
 5. **Fallback Protection**: Includes periodic checks to ensure styles remain applied
 
 ### Technical Implementation
 
-The core script:
-- Automatically finds the caption container in Google Meet
-- Modifies CSS styles to make text selectable while keeping avatars visible by:
-  - Setting caption text to a higher z-index (bringing it to the front)
-  - Positioning speaker avatar elements to a lower z-index (sending them to the back)
-  - Enabling user selection on caption text
-  - Using pointer-events to allow clicking through avatar elements
-- Sets up mutation observers to apply styles to new captions as they appear
-- Adds a fallback check to ensure styles are consistently applied
+The core scripts:
+- Automatically find their target containers (captions for Meet, navigation for Docs)
+- Modify CSS styles to enable desired functionality while maintaining visual integrity
+- Set up mutation observers to apply styles to new elements as they appear
+- Add fallback checks to ensure styles are consistently applied
+- Include domain validation to prevent cross-execution
 
 ### Modular Design Benefits
 
 - **Code Reusability**: Core functionality can be used both in the extension and standalone
 - **Easy Testing**: Copy-paste the script directly into console for quick testing
-- **Maintainability**: Single source of truth for caption manipulation logic
+- **Maintainability**: Single source of truth for each feature's logic
 - **Debugging**: Same debugging output whether used as extension or standalone script
+- **CSP Compliance**: No dynamic script injection, eliminating Content Security Policy violations
+- **Performance**: Scripts load only on their target domains, reducing unnecessary execution
 
 ## Privacy Notice
 
@@ -168,24 +167,27 @@ This extension:
 
 ## Technical Details
 
-- **Modular Architecture**: Core functionality separated from extension wrapper
-- **Dynamic Loading**: Content script fetches and executes core script at runtime
-- **Dual-Mode Operation**: Core script works both as extension module and standalone console script
-- **MutationObserver**: Detects new captions in real-time
+- **Modular Architecture**: Separate content scripts for each domain loaded directly from manifest
+- **Domain Isolation**: Each script validates its target domain before execution
+- **Dual-Mode Operation**: Core scripts work both as extension content scripts and standalone console scripts
+- **MutationObserver**: Detects new content in real-time
 - **Structure Detection**: Targets elements by DOM structure for better reliability
-- **Performance Optimized**: Applies styles with important flag to override Google Meet's defaults
+- **Performance Optimized**: Applies styles with important flag to override defaults
 - **Fallback System**: Includes periodic check to ensure styles are maintained
-- **Z-index Management**: Proper layering to allow both visibility and text selection
+- **Z-index Management**: Proper layering to allow both visibility and functionality
+- **CSP Compliant**: No inline script injection, eliminating security policy violations
 
 ## File Structure
 
 ```
 /
-├── content.js                 # Chrome extension content script (lightweight wrapper)
-├── manifest.json              # Extension configuration with web_accessible_resources
-└── allow-copy-caption-in-google-meet/
-    ├── script.js              # Core functionality (dual-mode: extension + standalone)
-    └── README.md              # Detailed documentation for standalone usage
+├── content.js                                    # Chrome extension content script (logging and coordination)
+├── manifest.json                                 # Extension configuration with separate content scripts
+├── allow-copy-caption-in-google-meet/
+│   ├── script.js                                 # Google Meet caption functionality (auto-loads on meet.google.com)
+│   └── README.md                                 # Documentation for standalone usage
+└── change-style-of-document-tabs/
+    └── script.js                                 # Google Docs navigation styling (auto-loads on docs.google.com)
 ```
 
 ## Credits

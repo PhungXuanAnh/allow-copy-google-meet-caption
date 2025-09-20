@@ -12,21 +12,19 @@
   ],
   "content_scripts": [
     {
+      "matches": ["https://meet.google.com/*"],
+      "js": ["allow-copy-caption-in-google-meet/script.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://docs.google.com/*"],
+      "js": ["change-style-of-document-tabs/script.js"],
+      "run_at": "document_idle"
+    },
+    {
       "matches": ["https://meet.google.com/*", "https://docs.google.com/*"],
       "js": ["content.js"],
       "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "allow-copy-caption-in-google-meet/script.js",
-        "change-style-of-document-tabs/script.js"
-      ],
-      "matches": [
-        "https://meet.google.com/*",
-        "https://docs.google.com/*"
-      ]
     }
   ],
   "icons": {
